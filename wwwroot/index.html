@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meeting Evidence · Oceans and the law of the sea</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/">MEETING EVIDENCE</a><span>Hackathon prototype · English records</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">GENERAL ASSEMBLY RESEARCH</p>
+      <h1>A clearer route to<br>the meeting record.</h1>
+      <p class="lead">Explore what delegations said about oceans and the law of the sea. Every result takes you back to the official record.</p>
+    </section>
+    <form id="question-form">
+      <label for="question">Your research question</label>
+      <div class="question-row"><textarea id="question" rows="2" maxlength="2000" required placeholder="Which delegations mentioned plastic pollution?"></textarea><button id="ask" type="submit">Find evidence <span aria-hidden="true">↗</span></button></div>
+      <div class="examples"><span>Try</span><button type="button" data-question="Which delegations mentioned plastic pollution?">Plastic pollution</button><button type="button" data-question="What did Samoa say about oceans?">Samoa’s statement</button><button type="button" data-question="Which delegations discussed financing?">Ocean financing</button><button type="button" data-question="Which delegations discussed sea level rise?">Sea level rise</button></div>
+      <div class="filters">
+        <label>Delegation<select id="delegation"><option value="">All delegations</option></select></label>
+        <label>Meeting year<select id="year"><option value="">All years</option><option>2023</option><option>2024</option></select></label>
+        <label for="search-mode">Retrieval<select id="search-mode"><option value="hybrid">Hybrid</option><option value="keyword">Keyword</option><option value="semantic">Semantic</option></select></label>
+        <label class="check"><input type="checkbox" id="groups">Group statements only</label>
+        <label class="check"><input type="checkbox" id="procedural">Include chair / Secretariat</label>
+        <label class="check" id="generation-label"><input type="checkbox" id="generate">Generate a local AI answer</label>
+      </div>
+      <p class="hint" id="model-status">Loading corpus…</p>
+    </form>
+    <section id="results" hidden aria-live="polite">
+      <div class="result-heading"><p class="eyebrow" id="mode"></p><button id="export" class="secondary" type="button">Export evidence CSV</button></div>
+      <p id="scope" class="hint"></p><p id="retrieval-warning" class="warning" hidden></p>
+      <p id="answer"></p><p id="warning" class="warning" hidden></p>
+      <p id="result-count" class="hint"></p>
+      <div class="table-scroll"><table><thead><tr><th>Delegation / speaker</th><th>Evidence from the record</th><th>Source</th></tr></thead><tbody id="evidence"></tbody></table></div>
+    </section>
+    <p id="error" role="alert" hidden></p>
+    <section class="corpus"><div class="corpus-title"><h2>The archive behind your answer</h2><span id="corpus-count"></span></div>
+      <p id="coverage"></p><div id="documents"></div>
+      <p class="hint">This is an independent research prototype. Generated answers and automated attributions require review; the linked official records are the evidence.</p>
+    </section>
+  </main>
+  <footer>GIDAS Innovation Hackathon 2026 · Use case 6 <span>Local application · Public UN documents</span></footer>
+  <dialog id="passage"><button type="button" id="close-dialog" class="secondary">Close</button><h2 id="passage-title"></h2><div id="passage-text"></div></dialog>
+</body>
+</html>

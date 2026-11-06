@@ -1,0 +1,30 @@
+[
+  {
+    "documentId": "A_78_PV.43",
+    "sourceUrl": "https://digitallibrary.un.org/record/4045203/files/A_78_PV.43-EN.pdf",
+    "downloadedAtUtc": "2026-10-28T11:56:55.5393323Z",
+    "sha256": "3D160CB66389CB59E99F64C446490FECC24BFFADF975A21856A4AADF609D4130",
+    "bytes": 651989
+  },
+  {
+    "documentId": "A_78_PV.44",
+    "sourceUrl": "https://digitallibrary.un.org/record/4045724/files/A_78_PV.44-EN.pdf",
+    "downloadedAtUtc": "2026-10-28T11:57:56.2063656Z",
+    "sha256": "38949D80DD09E76A272F3B769FAE1457132DB07C43A1CA08B15991AAF8BED07A",
+    "bytes": 662767
+  },
+  {
+    "documentId": "A_78_PV.48",
+    "sourceUrl": "https://digitallibrary.un.org/record/4048288/files/A_78_PV.48-EN.pdf",
+    "downloadedAtUtc": "2026-10-28T11:57:57.0252492Z",
+    "sha256": "080529294B8A8DE350D34B756C536240DA3F7C96E62EB3B2C7D15E886AA5D6E0",
+    "bytes": 615455
+  },
+  {
+    "documentId": "A_79_PV.52",
+    "sourceUrl": "https://digitallibrary.un.org/record/4114820/files/A_79_PV.52-EN.pdf",
+    "downloadedAtUtc": "2026-10-28T11:57:57.7780211Z",
+    "sha256": "4CE3B0A0F8B841DA71EF91B58D5FADEF16AB0B328A21F71A7FDF407246211373",
+    "bytes": 511684
+  }
+]

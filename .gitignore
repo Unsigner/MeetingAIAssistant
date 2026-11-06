@@ -1,0 +1,54 @@
+# .NET build and publish output
+[Bb]in/
+[Oo]bj/
+/publish/
+/artifacts/
+
+# IDE and user-specific settings
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.sln.iml
+
+# Local configuration and credentials (keep the example configuration)
+appsettings.Local.json
+appsettings.*.Local.json
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Local runtimes, models, and verification builds
+/Runtime/
+
+# Reproducible generated data (keep original PDFs in Data/raw/)
+/Data/retrieval-evaluation.json
+/Data/*.tmp
+/Data/*.download
+# Keep PDFs, extracted text, corpus, passages, embeddings, manifest, and test inputs.
+
+# Logs, test output, and coverage
+*.log
+TestResults/
+coverage/
+coverage*.json
+coverage*.xml
+*.coverage
+*.coveragexml
+
+# Temporary files and operating-system metadata
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Published application output
+/App/
