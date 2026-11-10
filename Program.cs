@@ -13,10 +13,12 @@ var embeddings = new EmbeddingIndex(builder.Configuration, new HttpClient { Time
 if (!args.Contains("--self-test"))
     await embeddings.Initialize(app.Environment.ContentRootPath, passages, args.Contains("--rebuild-embeddings"));
 var search = new HybridSearch(corpus, passages, embeddings, builder.Configuration);
+var research = new ResearchService(corpus, search);
 if (args.Contains("--self-test"))
 {
-    await SelfTests.Run(corpus, new EvidenceSearch(corpus));
+    await SelfTests.Run(corpus, search);
     await HybridTests.Run(corpus, search, embeddings);
+    await ResearchTests.Run(corpus, search, research);
     return;
 }
 if (args.Contains("--evaluate"))
@@ -69,6 +71,15 @@ app.MapPost("/api/ask", async (QueryRequest request, AnswerGenerator generator, 
     if (!new[] { "keyword", "semantic", "hybrid" }.Contains(request.SearchMode))
         return Results.BadRequest(new { error = "Search mode must be keyword, semantic, or hybrid." });
     return Results.Ok(await generator.Generate(request, await search.SearchAsync(request, cancellation), cancellation));
+});
+app.MapPost("/api/research", async (ResearchRequest input, AnswerGenerator generator, CancellationToken cancellation) =>
+{
+    if (input.Request == null || string.IsNullOrWhiteSpace(input.Request.Question) || input.Request.Question.Length > 2000 ||
+        (input.PreviousRequest != null && (string.IsNullOrWhiteSpace(input.PreviousRequest.Question) || input.PreviousRequest.Question.Length > 2000)))
+        return Results.BadRequest(new { error = "Enter a question between 1 and 2,000 characters; previous context must also fit that limit." });
+    if (!new[] { "keyword", "semantic", "hybrid" }.Contains(input.Request.SearchMode) || input.CompareYears is { Length: > 2 })
+        return Results.BadRequest(new { error = "Choose a supported retrieval mode and at most two comparison years." });
+    return Results.Ok(await research.Execute(input, generator, cancellation));
 });
 app.MapPost("/api/export", async (QueryRequest request, CancellationToken cancellation) =>
 {

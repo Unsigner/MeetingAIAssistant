@@ -8,7 +8,7 @@ namespace MeetingEvidence;
 
 public static class CorpusLoader
 {
-    public const string Version = "oceans-pv-v3";
+    public const string Version = "hrc-pv-v5";
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
     public static async Task<Corpus> Load(string root, bool rebuild, ILogger logger)
@@ -20,7 +20,7 @@ public static class CorpusLoader
         if (!rebuild && File.Exists(cache))
         {
             var saved = JsonSerializer.Deserialize<Corpus>(await File.ReadAllTextAsync(cache), Json);
-            if (saved?.ParserVersion == Version && saved.Documents.SequenceEqual(documents) &&
+            if (saved?.ParserVersion == Version && JsonSerializer.Serialize(saved.Documents, Json) == JsonSerializer.Serialize(documents, Json) &&
                 saved.Status.All(s => s.Status == "indexed") && saved.Status.Count == documents.Count &&
                 documents.All(d => File.Exists(Path.Combine(data, "raw", d.FileName))) &&
                 documents.All(d => saved.Status.Single(s => s.DocumentId == d.Id).Sha256 ==
@@ -46,7 +46,7 @@ public static class CorpusLoader
                 await File.WriteAllTextAsync(Path.Combine(data, "extracted", doc.Id + ".txt"),
                     string.Join("\n", lines.Select(l => $"[PDF page {l.Page}] {l.Text}")));
                 var parsed = Parse(doc, lines);
-                if (parsed.Count == 0) throw new InvalidDataException("No oceans interventions recognized. Inspect the extracted text.");
+                if (parsed.Count == 0) throw new InvalidDataException("No interventions recognized in the configured agenda sections. Inspect the extracted text.");
                 interventions.AddRange(parsed);
                 statuses.Add(new(doc.Id, Hash(path), pdf.NumberOfPages, parsed.Count, "indexed", null, twoColumns));
                 logger.LogInformation("Indexed {Symbol}: {Pages} pages, {Count} interventions", doc.Symbol, pdf.NumberOfPages, parsed.Count);
@@ -97,7 +97,7 @@ public static class CorpusLoader
                 var row = remaining.Where(w => Math.Abs(w.BoundingBox.Bottom - y) < 3).OrderBy(w => w.BoundingBox.Left).ToList();
                 foreach (var word in row) remaining.Remove(word);
                 var text = string.Join(" ", row.Select(w => w.Text));
-                if (Regex.IsMatch(text, @"^(A/\d+/PV\.|\d{2}/\d{2}/\d{4}(?:\s|$)|\d+/\d+(?:\s|$)|\d{2}-\d{5}(?:\s|$))")) continue;
+                if (Regex.IsMatch(text, @"^(A/(?:\d+|ES-\d+)/PV\.|\d{2}/\d{2}/\d{4}(?:\s|$)|\d+/\d+(?:\s|$)|\d{2}-\d{5}(?:\s|$))")) continue;
                 output.Add(new(page.Number, text.Replace('\u00ad', '-')));
             }
         }
@@ -108,7 +108,7 @@ public static class CorpusLoader
     {
         var result = new List<Intervention>();
         var active = false;
-        string? speaker = null, delegation = null;
+        string? speaker = null, delegation = null, office = null;
         var procedural = false;
         var parts = new List<SourceLine>();
         void Flush()
@@ -123,39 +123,50 @@ public static class CorpusLoader
                 if (represented != null && (represented.Equals(delegation, StringComparison.OrdinalIgnoreCase) ||
                     Regex.IsMatch(represented, @"^(?:my|our|this|his|her)\b", RegexOptions.IgnoreCase))) represented = null;
                 result.Add(new($"{doc.Id}-{result.Count + 1:D3}", doc.Id, doc.Symbol, doc.Date,
-                    speaker, delegation ?? "Unresolved", represented != null ? "Group statement" : "Not identified as a group statement",
+                    speaker, delegation ?? "Unresolved", office ?? (procedural ? "Chair / Secretariat record" : represented != null ? "Group statement" : "Not identified as a group statement"),
                     represented, procedural,
                     parts[0].Page, parts[^1].Page, segments));
             }
             parts = [];
-            speaker = delegation = null;
+            speaker = delegation = office = null;
         }
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
-            if (Regex.IsMatch(line.Text, @"^Agenda items?\s+\d+(?:\s+and\s+\d+)*(?:\s*\(continued\s*\))?\s*$"))
+            if (Regex.IsMatch(line.Text, @"^Agenda items?\s+\d+(?:\s+and\s+\d+)*(?:\s*\(continued\s*\))?\s*$", RegexOptions.IgnoreCase))
             {
                 Flush();
-                active = Regex.IsMatch(line.Text, @"\b75\b");
+                var numbers = Regex.Matches(line.Text, @"\d+").Select(m => int.Parse(m.Value));
+                active = numbers.Any(n => (doc.AgendaItems ?? [75]).Contains(n));
                 continue;
+            }
+            // Tributes can interrupt balloting without an intervening numbered agenda heading.
+            if (Regex.IsMatch(line.Text, @"^Tribute to the memory\b"))
+            {
+                Flush(); active = false; continue;
             }
             if (!active) continue;
             var possible = line.Text;
             var consumed = 0;
             // Speaker labels may wrap across several lines, but never absorb a subsequent speech.
-            if (Regex.IsMatch(possible, @"^(Mr\.|Mrs\.|Ms\.|The (?:Acting |Temporary )?President\s*:|The Secretary-General\s*:)") )
+            if (Regex.IsMatch(possible, @"^(Mr\.|Mrs\.|Ms\.|The (?:Acting |Temporary )?President\b|The Secretary-General\b)") )
             {
                 while (!possible.Contains(':') && consumed < 5 && i + consumed + 1 < lines.Count)
                     possible += " " + lines[i + ++consumed].Text;
                 var match = Regex.Match(possible,
-                    @"^(?<name>(?:Mr\.|Mrs\.|Ms\.)\s+[^:()]{1,100})\s*\((?<delegation>[^)]{1,150})\)(?:\s*\([^)]*\))*\s*:\s*(?<text>.*)$");
-                var chair = Regex.Match(possible, @"^(?<name>The (?:Acting |Temporary )?President|The Secretary-General)\s*:\s*(?<text>.*)$");
+                    @"^(?<name>(?:Mr\.|Mrs\.|Ms\.)\s+[^:()]{1,100})\s*\((?<delegation>[^)]{1,150})\)(?:,\s*(?<office>[^:()]{1,160}))?(?:\s*\([^)]*\))*\s*:\s*(?<text>.*)$");
+                var chair = Regex.Match(possible, @"^(?<name>The (?:Acting |Temporary )?President|The Secretary-General)(?:\s*\([^)]*\))*\s*:\s*(?<text>.*)$");
                 if (match.Success || chair.Success)
                 {
                     Flush();
                     var selected = match.Success ? match : chair;
                     speaker = selected.Groups["name"].Value.Trim();
                     delegation = match.Success ? match.Groups["delegation"].Value.Trim() : selected.Groups["name"].Value;
+                    office = match.Success && match.Groups["office"].Success ? match.Groups["office"].Value.Trim() : null;
+                    if (Regex.IsMatch(selected.Groups["text"].Value, @"^President,? (?:of the )?Human Rights Council\s*:", RegexOptions.IgnoreCase))
+                        office = "President of the Human Rights Council";
+                    if (office != null && Regex.IsMatch(office, @"^President(?:,| of the) Human Rights Council$", RegexOptions.IgnoreCase))
+                        delegation = "Human Rights Council";
                     procedural = chair.Success || delegation.Contains("Department for General Assembly");
                     parts.Add(new(line.Page, selected.Groups["text"].Value));
                     i += consumed;

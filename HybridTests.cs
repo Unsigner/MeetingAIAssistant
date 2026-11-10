@@ -18,16 +18,16 @@ public static class HybridTests
         Check(search.Passages.All(p => p.Length <= 800 && p.Text == corpus.Interventions.Single(i => i.Id == p.InterventionId)
             .Segments.Single(s => s.Page == p.Page).Text.Substring(p.Start, p.Length)), "Every passage maps exactly to its parent page offsets");
         Check(PassageIndex.Build(corpus).SequenceEqual(search.Passages), "Deterministic passage identifiers and boundaries");
-        var filtered = await search.SearchAsync(new("plastic pollution", "Samoa", 2023, SearchMode: "keyword"));
-        Check(filtered.Evidence.Count > 0 && filtered.Evidence.All(e => e.Delegation == "Samoa" && e.Date.StartsWith("2023")), "Passage search applies structured filters");
+        var filtered = await search.SearchAsync(new("human rights", "Brazil", 2024, SearchMode: "keyword"));
+        Check(filtered.Evidence.Count > 0 && filtered.Evidence.All(e => e.Delegation == "Brazil" && e.Date.StartsWith("2024")), "Passage search applies structured filters");
         Check(filtered.Evidence.All(e => e.Id.StartsWith(e.InterventionId + "-p")), "Passage citations preserve parent intervention");
-        var multiple = await search.SearchAsync(new("What did Samoa and Tonga say about financing?", SearchMode: "keyword"));
-        Check(multiple.Evidence.Count > 0 && multiple.Evidence.All(e => e.Delegation is "Samoa" or "Tonga"), "Multiple named delegations form a union filter");
-        var alias = await search.SearchAsync(new("What did Micronesia say about plastic?", SearchMode: "keyword"));
-        Check(alias.Evidence.Count > 0 && alias.Evidence.All(e => e.Delegation == "Federated States of Micronesia"), "Delegation alias resolves to printed identity");
-        var symbol = await search.SearchAsync(new("A/78/PV.44", SearchMode: "keyword"));
-        Check(symbol.Evidence.Count > 0 && symbol.Evidence.All(e => e.Symbol == "A/78/PV.44"), "Exact document symbols form a structured filter");
-        var fallback = await search.SearchAsync(new("plastic pollution"));
+        var multiple = await search.SearchAsync(new("What did Brazil and Portugal say about human rights?", SearchMode: "keyword"));
+        Check(multiple.Evidence.Count > 0 && multiple.Evidence.All(e => e.Delegation is "Brazil" or "Portugal"), "Multiple named delegations form a union filter");
+        var alias = await search.SearchAsync(new("What did Russia say about suspension?", SearchMode: "keyword"));
+        Check(alias.Evidence.Count > 0 && alias.Evidence.All(e => e.Delegation == "Russian Federation"), "Delegation alias resolves to printed identity");
+        var symbol = await search.SearchAsync(new("A/78/PV.23", SearchMode: "keyword"));
+        Check(symbol.Evidence.Count > 0 && symbol.Evidence.All(e => e.Symbol == "A/78/PV.23"), "Exact document symbols form a structured filter");
+        var fallback = await search.SearchAsync(new("human rights"));
         Check(fallback.Retrieval?.Mode == "keyword" && fallback.Retrieval.Warning != null, "Offline hybrid request transparently falls back to keyword");
         Check(!fallback.Retrieval!.Exhaustive, "Results never claim exhaustive topic coverage");
         var absent = await search.SearchAsync(new("xylophonemoonbase", SearchMode:"keyword"));

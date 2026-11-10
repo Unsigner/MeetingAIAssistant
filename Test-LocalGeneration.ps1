@@ -1,6 +1,6 @@
 param(
-    [string]$Question = 'What did Samoa say about financing?',
-    [int]$Year = 2023,
+    [string]$Question = 'What did Brazil say about human rights?',
+    [int]$Year = 2024,
     [string]$BaseUrl = 'http://localhost:5086'
 )
 $ErrorActionPreference = 'Stop'

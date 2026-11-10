@@ -2,45 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meeting Evidence · Oceans and the law of the sea</title>
-  <link rel="stylesheet" href="/style.css">
-  <script src="/app.js" defer></script>
+  <title>Meeting Records · HRC research workspace</title>
+  <link rel="stylesheet" href="/style.css?v=research-workspace-4"><script src="/app.js?v=research-workspace-4" defer></script>
 </head>
 <body>
-  <header><a class="brand" href="/">MEETING EVIDENCE</a><span>Hackathon prototype · English records</span></header>
+  <header><a class="brand" href="/">MEETING RECORDS</a><span>Research workspace</span><span class="header-scope">English · General Assembly</span></header>
   <main>
-    <section class="intro"><p class="eyebrow">GENERAL ASSEMBLY RESEARCH</p>
-      <h1>A clearer route to<br>the meeting record.</h1>
-      <p class="lead">Explore what delegations said about oceans and the law of the sea. Every result takes you back to the official record.</p>
-    </section>
-    <form id="question-form">
-      <label for="question">Your research question</label>
-      <div class="question-row"><textarea id="question" rows="2" maxlength="2000" required placeholder="Which delegations mentioned plastic pollution?"></textarea><button id="ask" type="submit">Find evidence <span aria-hidden="true">↗</span></button></div>
-      <div class="examples"><span>Try</span><button type="button" data-question="Which delegations mentioned plastic pollution?">Plastic pollution</button><button type="button" data-question="What did Samoa say about oceans?">Samoa’s statement</button><button type="button" data-question="Which delegations discussed financing?">Ocean financing</button><button type="button" data-question="Which delegations discussed sea level rise?">Sea level rise</button></div>
-      <div class="filters">
-        <label>Delegation<select id="delegation"><option value="">All delegations</option></select></label>
-        <label>Meeting year<select id="year"><option value="">All years</option><option>2023</option><option>2024</option></select></label>
-        <label for="search-mode">Retrieval<select id="search-mode"><option value="hybrid">Hybrid</option><option value="keyword">Keyword</option><option value="semantic">Semantic</option></select></label>
+    <section class="intro"><p class="eyebrow">GENERAL ASSEMBLY RESEARCH</p><h1>Ask the record. Follow the evidence.</h1><p>Explore Human Rights Council debates, elections and procedures. Verify findings in the official record.</p></section>
+    <section class="corpus-banner" aria-label="Corpus summary"><span class="status-dot" aria-hidden="true"></span><div><strong>HRC pilot corpus</strong><p id="corpus-summary">Loading official records…</p></div><button class="text-button" id="view-coverage">View corpus coverage →</button><span class="banner-note">Answers cite sources<br>Coverage is limited</span></section>
+    <div class="workspace">
+      <section class="conversation" aria-label="Research conversation">
+        <div class="panel-heading"><h2>Research conversation</h2><button id="new-conversation" class="text-button">New conversation +</button></div>
+        <div id="messages" aria-live="polite">
+          <div class="empty-state" id="empty-state"><p class="eyebrow">START WITH THE EVIDENCE</p><h3>What would you like to investigate?</h3><p>Search the selected records, then refine the same topic by year, session or speaking capacity.</p><div class="examples"><button data-question="Which delegations discussed universal periodic review?">Universal periodic review</button><button data-question="What did Brazil say about human rights in 2024?">Brazil’s statement</button><button data-question="What election results were recorded in A/79/PV.19?">2024 election</button><button data-question="What did Russia say about suspension in 2022?">Suspension debate</button></div><p class="hint">This demo cannot establish which states were never elected. Procedural history is incomplete.</p></div>
+        </div>
+        <p id="error" role="alert" hidden></p>
+        <form id="question-form" class="composer"><label for="question">Ask a question or refine the current topic</label><div class="composer-row"><textarea id="question" rows="2" maxlength="2000" required placeholder="Ask a question, or follow up: same question in 2023"></textarea><button id="ask" type="submit">Send ↑</button></div><p id="request-status" class="hint" role="status">Conversation stays in this tab only. Refreshing clears it.</p></form>
+      </section>
+      <aside class="scope-panel" aria-labelledby="scope-title"><div class="panel-heading"><h2 id="scope-title">Research scope</h2></div><div class="scope-body">
+        <p class="section-label">FILTERS FOR THE NEXT REQUEST</p>
+        <label>Meeting body<select disabled data-fixed="true"><option>General Assembly</option></select></label>
+        <label>Record type<select disabled data-fixed="true"><option>Verbatim meeting records (PV)</option></select></label>
+        <p class="hint">Only General Assembly PV records are in this corpus.</p>
+        <label>Delegation / organization<select id="delegation"><option value="">All delegations</option></select></label>
+        <label>Meeting year<select id="year"><option value="">All years</option></select></label>
+        <p id="session-scope" class="hint" hidden></p>
+        <label>Retrieval<select id="search-mode"><option value="hybrid">Hybrid</option><option value="keyword">Keyword</option><option value="semantic">Semantic</option></select></label>
         <label class="check"><input type="checkbox" id="groups">Group statements only</label>
-        <label class="check"><input type="checkbox" id="procedural">Include chair / Secretariat</label>
-        <label class="check" id="generation-label"><input type="checkbox" id="generate">Generate a local AI answer</label>
-      </div>
-      <p class="hint" id="model-status">Loading corpus…</p>
-    </form>
-    <section id="results" hidden aria-live="polite">
-      <div class="result-heading"><p class="eyebrow" id="mode"></p><button id="export" class="secondary" type="button">Export evidence CSV</button></div>
-      <p id="scope" class="hint"></p><p id="retrieval-warning" class="warning" hidden></p>
-      <p id="answer"></p><p id="warning" class="warning" hidden></p>
-      <p id="result-count" class="hint"></p>
-      <div class="table-scroll"><table><thead><tr><th>Delegation / speaker</th><th>Evidence from the record</th><th>Source</th></tr></thead><tbody id="evidence"></tbody></table></div>
-    </section>
-    <p id="error" role="alert" hidden></p>
-    <section class="corpus"><div class="corpus-title"><h2>The archive behind your answer</h2><span id="corpus-count"></span></div>
-      <p id="coverage"></p><div id="documents"></div>
-      <p class="hint">This is an independent research prototype. Generated answers and automated attributions require review; the linked official records are the evidence.</p>
-    </section>
+        <label class="check"><input type="checkbox" id="procedural" checked>Include chair / Secretariat</label>
+        <label class="check"><input type="checkbox" id="generate">Generate a local AI answer</label>
+        <p class="hint">Election announcements appear in chair records. Each answer keeps its own scope and export.</p>
+        <details class="comparison-options"><summary>Comparison years</summary><div class="year-pair"><label>First year<select id="compare-from"></select></label><label>Second year<select id="compare-to"></select></label></div><p class="hint">Use “Compare by year” below an answer. Evidence is compared; sample counts are not trends.</p></details>
+        <div class="transparency"><p class="section-label">TRANSPARENCY</p><p id="index-status">Loading corpus…</p><p>Selected meetings, not continuous historical coverage.</p><p>Every excerpt links to a source page. Automated attribution and AI claims need review.</p><button id="browse-records" class="text-button">Browse all indexed records →</button></div>
+        <p id="model-status" class="hint"></p>
+      </div></aside>
+    </div>
+    <details id="corpus-details" class="corpus-details"><summary>The archive behind your answer <span id="corpus-count"></span></summary><p id="coverage" class="hint"></p><div id="documents"></div><p class="hint">Original official UN documents are preserved. Speaker and agenda extraction is heuristic. This independent prototype does not imply UN endorsement.</p></details>
   </main>
-  <footer>GIDAS Innovation Hackathon 2026 · Use case 6 <span>Local application · Public UN documents</span></footer>
-  <dialog id="passage"><button type="button" id="close-dialog" class="secondary">Close</button><h2 id="passage-title"></h2><div id="passage-text"></div></dialog>
-</body>
-</html>
+  <footer>GIDAS Innovation Hackathon 2026 · Use case 6<span>Local .NET application · Public UN records</span></footer>
+  <dialog id="passage" aria-labelledby="passage-title"><button type="button" id="close-dialog" class="secondary">Close</button><h2 id="passage-title"></h2><div id="passage-text"></div></dialog>
+</body></html>

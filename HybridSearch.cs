@@ -35,29 +35,51 @@ public sealed class HybridSearch
     }
     public string Coverage => $"Pilot corpus: {_corpus.Status.Count(s => s.Status == "indexed")}/{_corpus.Documents.Count} English General Assembly PVs; " +
         $"{Passages.Count} passages from {_corpus.Interventions.Count} detected interventions. " +
-        $"Meeting dates {_corpus.Documents.Min(d => d.Date)} to {_corpus.Documents.Max(d => d.Date)}. Only agenda sections including item 75 are indexed. " +
+        $"Meeting dates {_corpus.Documents.Min(d => d.Date)} to {_corpus.Documents.Max(d => d.Date)}. Only the Human Rights Council-related agenda sections listed in the source manifest are indexed. " +
         "Selected meetings, not continuous historical coverage. Attribution is automatic. Results are retrieval candidates, not an exhaustive list of relevant statements.";
     private record Plan(string[] Terms, string[] Delegations, int[] Years, string[] Symbols, string Scope, string? Refusal);
+    public string[] DetectDelegations(string question)
+    {
+        var subject = Regex.Match(question, @"^(?:What|How) (?:did|does|do|has|have) (?<name>[\p{L} .’'\-]{2,100}?) (?:say|state|mention|discuss|describe)\b", RegexOptions.IgnoreCase);
+        var subjectText = subject.Success ? subject.Groups["name"].Value.Trim() : null;
+        if (subjectText != null && Regex.IsMatch(subjectText, @"^(?:the )?(?:delegations?|states?|countries|speakers?|members?)$", RegexOptions.IgnoreCase)) return [];
+        var inspected = subjectText ?? question;
+        var names = _corpus.Interventions.Where(i => !i.IsProcedural && i.Delegation != "Human Rights Council")
+            .Select(i => i.Delegation).Concat(Aliases.Keys).Distinct().Where(d => new[] { d }.Concat(Aliases.GetValueOrDefault(d) ?? [])
+                .Any(name => Regex.IsMatch(inspected, @"\b" + Regex.Escape(name) + @"\b", RegexOptions.IgnoreCase))).ToArray();
+        if (names.Length > 0) return names;
+        // An explicitly requested speaker absent from this small corpus must not broaden into other speakers.
+        return subjectText != null ? [subjectText] : [];
+    }
+    public string? ScopeConflict(QueryRequest request)
+    {
+        var named = DetectDelegations(request.Question);
+        if (!string.IsNullOrWhiteSpace(request.Delegation) && named.Any(d => !d.Equals(request.Delegation, StringComparison.OrdinalIgnoreCase)))
+            return $"Your question names {string.Join(", ", named)}, but the delegation filter selects {request.Delegation}. Align the question and filter, then send again.";
+        var years = Regex.Matches(request.Question, @"\b20\d{2}\b").Select(m => int.Parse(m.Value)).Distinct().ToArray();
+        if (request.Year.HasValue && years.Any(y => y != request.Year.Value))
+            return $"Your question names {string.Join(", ", years)}, but the year filter selects {request.Year}. Align the question and filter, then send again.";
+        return null;
+    }
     private Plan Interpret(QueryRequest request)
     {
         var q = request.Question.Trim();
-        var refusal = Regex.IsMatch(q, @"\b(elected|elections?|human rights council|first ever|never served)\b", RegexOptions.IgnoreCase)
-            ? "This corpus cannot establish complete election history or historical firsts. Use a verified structured historical dataset." : null;
+        var refusal = ScopeConflict(request) ?? (Regex.IsMatch(q, @"\b(never|first ever|all time|ever elected)\b", RegexOptions.IgnoreCase)
+            ? "This corpus cannot establish complete election history or historical firsts. Use a verified structured historical dataset." : null);
         var years = request.Year.HasValue ? [request.Year.Value] :
             Regex.Matches(q, @"\b20\d{2}\b").Select(m => int.Parse(m.Value)).Distinct().ToArray();
-        var symbols = Regex.Matches(q, @"\bA/\d+/PV\.\d+\b", RegexOptions.IgnoreCase).Select(m => m.Value.ToUpperInvariant()).Distinct().ToArray();
+        var symbols = Regex.Matches(q, @"\bA/(?:\d+|ES-\d+)/PV\.\d+\b", RegexOptions.IgnoreCase).Select(m => m.Value.ToUpperInvariant()).Distinct().ToArray();
         var delegations = !string.IsNullOrWhiteSpace(request.Delegation) ? [request.Delegation.Trim()] :
-            _corpus.Interventions.Where(i => !i.IsProcedural).Select(i => i.Delegation).Distinct().Where(d =>
-                new[] { d }.Concat(Aliases.GetValueOrDefault(d) ?? []).Any(name =>
-                    Regex.IsMatch(q, @"\b" + Regex.Escape(name) + @"\b", RegexOptions.IgnoreCase))).ToArray();
+            DetectDelegations(q);
         var nameTerms = delegations.SelectMany(d => new[] { d }.Concat(Aliases.GetValueOrDefault(d) ?? [])).SelectMany(EvidenceSearch.Tokens).ToHashSet();
         var topic = symbols.Aggregate(q, (text, symbol) => text.Replace(symbol, "", StringComparison.OrdinalIgnoreCase));
         var terms = EvidenceSearch.Tokens(topic).Where(t => !Stop.Contains(t) && !nameTerms.Contains(t) && !Regex.IsMatch(t, @"^\d+$")).Distinct().ToList();
-        string[] generic = ["ocean", "sea", "marine", "law"];
+        string[] generic = ["human", "rights", "council"];
         if (terms.Any(t => !generic.Contains(t))) terms.RemoveAll(t => generic.Contains(t));
         var scope = $"Delegations: {(delegations.Length == 0 ? "all" : string.Join(", ", delegations))}. " +
             $"Years: {(years.Length == 0 ? "all corpus years" : string.Join(", ", years))}. " +
             (symbols.Length > 0 ? "Documents: " + string.Join(", ", symbols) + ". " : "") +
+            (request.Session.HasValue ? $"Assembly session: {request.Session}. " : "") +
             (request.GroupsOnly ? "Group statements only. " : "") +
             (request.IncludeProcedural ? "Chair/Secretariat included." : "Chair/Secretariat excluded.");
         return new(terms.ToArray(), delegations, years, symbols, scope, refusal);
@@ -87,6 +109,7 @@ public sealed class HybridSearch
         {
             var i = _parents[p.InterventionId];
             return (request.IncludeProcedural || !i.IsProcedural) &&
+                (!request.Session.HasValue || _documents[i.DocumentId].Session == request.Session.Value) &&
                 (plan.Delegations.Length == 0 || plan.Delegations.Contains(i.Delegation, StringComparer.OrdinalIgnoreCase)) &&
                 (plan.Years.Length == 0 || plan.Years.Any(y => i.Date.StartsWith(y.ToString()))) &&
                 (plan.Symbols.Length == 0 || plan.Symbols.Contains(i.Symbol)) &&
@@ -100,8 +123,8 @@ public sealed class HybridSearch
         if (scope.Count == 0) return Empty("No passages exist within these filters. This does not establish historical absence.");
         if (plan.Terms.Length == 0)
         {
-            if (plan.Delegations.Length == 0 && plan.Symbols.Length == 0 && !request.GroupsOnly && !Regex.IsMatch(request.Question, @"\b(speakers?|delegations?|statements?|oceans?)\b", RegexOptions.IgnoreCase))
-                return Empty("Enter an oceans topic or select a delegation.");
+            if (plan.Delegations.Length == 0 && plan.Symbols.Length == 0 && !request.GroupsOnly && !Regex.IsMatch(request.Question, @"\b(speakers?|delegations?|statements?|human rights council)\b", RegexOptions.IgnoreCase))
+                return Empty("Enter a Human Rights Council topic or select a delegation.");
             return Create(scope.Select(p => (p, Score: 0.0, Similarity: (double?)null, Keyword: (int?)null, Semantic: (int?)null)).ToList(), info with { Mode = "browse" }, plan, limit);
         }
         var lexical = scope.Select(p =>

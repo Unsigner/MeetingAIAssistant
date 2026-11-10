@@ -1,6 +1,152 @@
 [
-  {"id":"A_78_PV.43","symbol":"A/78/PV.43","date":"2023-12-05","session":78,"language":"en","recordType":"PV","fileName":"A_78_PV.43-EN.pdf","recordUrl":"https://digitallibrary.un.org/record/4045203","pdfUrl":"https://digitallibrary.un.org/record/4045203/files/A_78_PV.43-EN.pdf","notes":"Contains other agenda items; only agenda item 75 is indexed."},
-  {"id":"A_78_PV.44","symbol":"A/78/PV.44","date":"2023-12-05","session":78,"language":"en","recordType":"PV","fileName":"A_78_PV.44-EN.pdf","recordUrl":"https://digitallibrary.un.org/record/4045724","pdfUrl":"https://digitallibrary.un.org/record/4045724/files/A_78_PV.44-EN.pdf","notes":"Reissued for technical reasons 3 July 2025; downloaded version retained."},
-  {"id":"A_78_PV.48","symbol":"A/78/PV.48","date":"2023-12-18","session":78,"language":"en","recordType":"PV","fileName":"A_78_PV.48-EN.pdf","recordUrl":"https://digitallibrary.un.org/record/4048288","pdfUrl":"https://digitallibrary.un.org/record/4048288/files/A_78_PV.48-EN.pdf","notes":"Contains several agenda items; only sections including item 75 are indexed."},
-  {"id":"A_79_PV.52","symbol":"A/79/PV.52","date":"2024-12-12","session":79,"language":"en","recordType":"PV","fileName":"A_79_PV.52-EN.pdf","recordUrl":"https://digitallibrary.un.org/record/4114820","pdfUrl":"https://digitallibrary.un.org/record/4114820/files/A_79_PV.52-EN.pdf","notes":"Contains other agenda items; only agenda item 75 is indexed."}
+  {
+    "id": "A_75_PV.16",
+    "symbol": "A/75/PV.16",
+    "date": "2020-10-13",
+    "session": 75,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_75_PV.16-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/3896034",
+    "pdfUrl": "https://digitallibrary.un.org/record/3896034/files/A_75_PV.16-EN.pdf",
+    "notes": "HRC election in 2020; only agenda item 119 is indexed.",
+    "agendaItems": [
+      119
+    ]
+  },
+  {
+    "id": "A_76_PV.19",
+    "symbol": "A/76/PV.19",
+    "date": "2021-10-14",
+    "session": 76,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_76_PV.19-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/3958564",
+    "pdfUrl": "https://digitallibrary.un.org/record/3958564/files/A_76_PV.19-EN.pdf",
+    "notes": "HRC election in 2021; only agenda item 116 is indexed.",
+    "agendaItems": [
+      116
+    ]
+  },
+  {
+    "id": "A_ES-11_PV.10",
+    "symbol": "A/ES-11/PV.10",
+    "date": "2022-04-07",
+    "session": 11,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_ES-11_PV.10-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/3972658",
+    "pdfUrl": "https://digitallibrary.un.org/record/3972658/files/A_ES-11_PV.10-EN.pdf",
+    "notes": "Emergency special-session debate on suspension of Russian Federation membership rights in the HRC; agenda item 5.",
+    "agendaItems": [
+      5
+    ]
+  },
+  {
+    "id": "A_76_PV.71",
+    "symbol": "A/76/PV.71",
+    "date": "2022-05-10",
+    "session": 76,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_76_PV.71-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/3986904",
+    "pdfUrl": "https://digitallibrary.un.org/record/3986904/files/A_76_PV.71-EN.pdf",
+    "notes": "HRC by-election in 2022; only agenda item 116 is indexed.",
+    "agendaItems": [
+      116
+    ]
+  },
+  {
+    "id": "A_77_PV.17",
+    "symbol": "A/77/PV.17",
+    "date": "2022-10-11",
+    "session": 77,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_77_PV.17-EN.pdf",
+    "recordUrl": "https://docs.un.org/en/A/77/PV.17",
+    "pdfUrl": "https://documents.un.org/api/symbol/access?l=en&s=A%2F77%2FPV.17&t=pdf",
+    "notes": "HRC election in 2022; only agenda item 117 is indexed.",
+    "agendaItems": [
+      117
+    ]
+  },
+  {
+    "id": "A_78_PV.17",
+    "symbol": "A/78/PV.17",
+    "date": "2023-10-10",
+    "session": 78,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_78_PV.17-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/4039081",
+    "pdfUrl": "https://digitallibrary.un.org/record/4039081/files/A_78_PV.17-EN.pdf",
+    "notes": "HRC election in 2023; only agenda item 114 is indexed.",
+    "agendaItems": [
+      114
+    ]
+  },
+  {
+    "id": "A_78_PV.23",
+    "symbol": "A/78/PV.23",
+    "date": "2023-10-31",
+    "session": 78,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_78_PV.23-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/4039478",
+    "pdfUrl": "https://digitallibrary.un.org/record/4039478/files/A_78_PV.23-EN.pdf",
+    "notes": "Report of the HRC, debate in 2023; only agenda item 66 is indexed.",
+    "agendaItems": [
+      66
+    ]
+  },
+  {
+    "id": "A_78_PV.28",
+    "symbol": "A/78/PV.28",
+    "date": "2023-11-07",
+    "session": 78,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_78_PV.28-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/4040945",
+    "pdfUrl": "https://digitallibrary.un.org/record/4040945/files/A_78_PV.28-EN.pdf",
+    "notes": "Report of the HRC, continued debate in 2023; only agenda item 66 is indexed.",
+    "agendaItems": [
+      66
+    ]
+  },
+  {
+    "id": "A_79_PV.19",
+    "symbol": "A/79/PV.19",
+    "date": "2024-10-09",
+    "session": 79,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_79_PV.19-EN.pdf",
+    "recordUrl": "https://digitallibrary.un.org/record/4082049",
+    "pdfUrl": "https://digitallibrary.un.org/record/4082049/files/A_79_PV.19-EN.pdf",
+    "notes": "HRC election in 2024; only agenda item 115 is indexed.",
+    "agendaItems": [
+      115
+    ]
+  },
+  {
+    "id": "A_79_PV.32",
+    "symbol": "A/79/PV.32",
+    "date": "2024-11-01",
+    "session": 79,
+    "language": "en",
+    "recordType": "PV",
+    "fileName": "A_79_PV.32-EN.pdf",
+    "recordUrl": "https://docs.un.org/en/A/79/PV.32",
+    "pdfUrl": "https://documents.un.org/api/symbol/access?l=en&s=A%2F79%2FPV.32&t=pdf",
+    "notes": "Report of the HRC, debate in 2024; only agenda item 66 is indexed.",
+    "agendaItems": [
+      66
+    ]
+  }
 ]

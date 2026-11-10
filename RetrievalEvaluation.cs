@@ -5,7 +5,7 @@ namespace MeetingEvidence;
 public static class RetrievalEvaluation
 {
     private record Target(string InterventionId, int Page, string Contains);
-    private record Case(string Name, string Question, bool Negative, Target[] Targets, string[]? TopicAnchors = null);
+    private record Case(string Name, string Question, bool Negative, Target[] Targets, string[]? TopicAnchors = null, int? Year = null, bool IncludeProcedural = false);
     public static async Task Run(string root, HybridSearch search, EmbeddingIndex embeddings)
     {
         if (!embeddings.Ready) throw new InvalidOperationException("A live semantic index is required for evaluation; keyword fallback must not be reported as hybrid.");
@@ -19,7 +19,7 @@ public static class RetrievalEvaluation
                     throw new InvalidDataException("Evaluation label does not match corpus: " + item.Name);
             foreach (var mode in new[] { "keyword", "semantic", "hybrid" })
             {
-                var result = await search.SearchAsync(new(item.Question, Year:2023, SearchMode:mode));
+                var result = await search.SearchAsync(new(item.Question, Year:item.Year, IncludeProcedural:item.IncludeProcedural, SearchMode:mode));
                 if (mode != "keyword" && result.Retrieval?.Mode != mode) throw new InvalidOperationException("Semantic evaluation fell back to keyword.");
                 bool Hit(int k) => item.Targets.Any(t => result.Evidence.Take(k).Any(e => e.InterventionId == t.InterventionId && e.Page == t.Page && e.Excerpt.Contains(t.Contains, StringComparison.OrdinalIgnoreCase)));
                 var hit5 = item.Negative ? result.Evidence.Count == 0 : Hit(5);

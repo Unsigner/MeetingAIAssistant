@@ -12,7 +12,7 @@ foreach ($document in $manifest) {
     $destination = Join-Path $rawPath $document.fileName
     $downloaded = $false
     if ($Force -or -not (Test-Path -LiteralPath $destination)) {
-        Write-Host "Downloading $($document.symbol) from the UN Digital Library"
+        Write-Host "Downloading $($document.symbol) from the official UN source"
         $temporary = $destination + '.download'
         try {
             Invoke-WebRequest -Uri $document.pdfUrl -OutFile $temporary -TimeoutSec 120

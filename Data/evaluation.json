@@ -1,108 +1,94 @@
 [
   {
-    "name": "Acidification paraphrase",
-    "question": "Water is becoming more acidic",
+    "name": "Brazil and equal rights",
+    "question": "What did Brazil say about the rights of women and girls?",
     "negative": false,
     "targets": [
       {
-        "interventionId": "A_78_PV.43-018",
-        "page": 20,
-        "contains": "acidification"
-      },
+        "interventionId": "A_79_PV.32-014",
+        "page": 18,
+        "contains": "women and girls"
+      }
+    ],
+    "topicAnchors": [
+      "women and girls"
+    ],
+    "year": 2024,
+    "includeProcedural": false
+  },
+  {
+    "name": "Peer review mechanism",
+    "question": "Which delegations discussed universal periodic review?",
+    "negative": false,
+    "targets": [
       {
-        "interventionId": "A_78_PV.43-019",
+        "interventionId": "A_79_PV.32-014",
+        "page": 18,
+        "contains": "Universal Periodic Review"
+      }
+    ],
+    "topicAnchors": [
+      "Universal Periodic Review"
+    ],
+    "year": 2024,
+    "includeProcedural": false
+  },
+  {
+    "name": "Suspension position",
+    "question": "What did Russia say about suspension in 2022?",
+    "negative": false,
+    "targets": [
+      {
+        "interventionId": "A_ES-11_PV.10-044",
         "page": 22,
-        "contains": "acidification"
+        "contains": "suspension"
       }
     ],
-    "TopicAnchors": [
-      "acidification"
-    ]
+    "topicAnchors": [
+      "suspension"
+    ],
+    "year": 2022,
+    "includeProcedural": false
   },
   {
-    "name": "Fishing paraphrase",
-    "question": "Catching fish without reporting it",
+    "name": "Death penalty debate",
+    "question": "What did Switzerland say about the death penalty?",
     "negative": false,
     "targets": [
       {
-        "interventionId": "A_78_PV.43-002",
-        "page": 3,
-        "contains": "illegal, unreported"
-      },
-      {
-        "interventionId": "A_78_PV.43-007",
-        "page": 7,
-        "contains": "illegal, unreported"
-      }
-    ],
-    "TopicAnchors": [
-      "illegal, unreported",
-      "IUU fishing"
-    ]
-  },
-  {
-    "name": "Technology support paraphrase",
-    "question": "Sharing scientific know-how with poorer nations",
-    "negative": false,
-    "targets": [
-      {
-        "interventionId": "A_78_PV.43-009",
-        "page": 11,
-        "contains": "technology transfer"
-      },
-      {
-        "interventionId": "A_78_PV.43-017",
-        "page": 20,
-        "contains": "technology transfer"
-      }
-    ],
-    "TopicAnchors": [
-      "technology transfer",
-      "transfer of technology",
-      "capacity-building"
-    ]
-  },
-  {
-    "name": "Rising water paraphrase",
-    "question": "Coastlines moving inland as water rises",
-    "negative": false,
-    "targets": [
-      {
-        "interventionId": "A_78_PV.43-008",
-        "page": 9,
-        "contains": "Preserving Maritime Zones"
-      }
-    ],
-    "TopicAnchors": [
-      "sea level rise",
-      "sea-level rise"
-    ]
-  },
-  {
-    "name": "Exact plastic topic",
-    "question": "plastic pollution",
-    "negative": false,
-    "targets": [
-      {
-        "interventionId": "A_78_PV.43-009",
-        "page": 11,
-        "contains": "plastic pollution"
-      },
-      {
-        "interventionId": "A_78_PV.43-008",
+        "interventionId": "A_78_PV.23-009",
         "page": 10,
-        "contains": "Plastic Pollution"
+        "contains": "death penalty"
       }
     ],
-    "TopicAnchors": [
-      "plastic pollution"
-    ]
+    "topicAnchors": [
+      "death penalty"
+    ],
+    "year": 2023,
+    "includeProcedural": false
+  },
+  {
+    "name": "2024 election source",
+    "question": "What election results were recorded in A/79/PV.19?",
+    "negative": false,
+    "targets": [
+      {
+        "interventionId": "A_79_PV.19-005",
+        "page": 18,
+        "contains": "three-year term"
+      }
+    ],
+    "topicAnchors": [
+      "three-year term"
+    ],
+    "year": 2024,
+    "includeProcedural": true
   },
   {
     "name": "Out of domain",
     "question": "myocardial infarction diagnosis",
     "negative": true,
     "targets": [],
-    "TopicAnchors": []
+    "topicAnchors": []
   }
 ]

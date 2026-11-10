@@ -1,26 +1,21 @@
 # Meeting Evidence Assistant
 
-A local .NET hackathon application for researching General Assembly debates on oceans and the law of the sea. It indexes attributed passages, combines keyword and semantic retrieval, and optionally generates cited answers using a small local language model.
+A .NET demo for researching **Human Rights Council elections, membership procedures, and debate** in official General Assembly meeting records. It combines keyword and semantic retrieval, optional local AI answers, source inspection, and CSV export.
+
+![Two-year HRC evidence comparison in the research workspace](Documentation/Research-Workspace.png)
 
 ## Download, build, and run
 
-This repository contains source code, the four original UN PDFs, extracted text, the structured corpus, searchable passages, and cached embeddings. No prebuilt application, .NET runtime, Ollama binaries, or model weights are included.
+Requirements: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [Ollama](https://ollama.com/download/windows). Clone the repository or extract its ZIP into a writable folder. PDFs, extracted text, corpus, passages, and embeddings are included; there is no prebuilt application or bundled Ollama/model installation.
 
-Prerequisites on Windows:
-
-- .NET 10 SDK: https://dotnet.microsoft.com/download/dotnet/10.0
-- Ollama: https://ollama.com/download/windows
-
-1. Clone the repository or download and extract its ZIP to a writable folder.
-2. Start the Ollama Windows app. Alternatively, run `ollama serve` in a separate terminal.
-3. Open a new terminal and download both models once:
+Start Ollama and download both models once:
 
 ```powershell
 ollama pull nomic-embed-text
 ollama pull qwen2.5:1.5b
 ```
 
-4. From the project root, restore dependencies, build, and run:
+From the project root:
 
 ```powershell
 dotnet restore
@@ -28,157 +23,114 @@ dotnet build
 dotnet run --no-build --no-launch-profile
 ```
 
-5. Open http://localhost:5086 in your browser.
+Open http://localhost:5086. Alternatively, double-click `Start.cmd`, which restores, builds, and runs the source. Visual Studio uses its own launch-profile URL; run one app instance per port. Press Ctrl+C to stop the app. Ollama is managed separately through its Windows app or `ollama serve`.
 
-Alternatively, double-click `Start.cmd`; it runs `dotnet run --no-launch-profile`, which restores and builds automatically. You can also open the solution in Visual Studio with .NET 10 support; its launch profile may use a different address. Keep Ollama running. Do not run two app instances on the same port. Press Ctrl+C in the app terminal to stop the web app.
+`appsettings.json` enables semantic search and answer generation by default. Optional private overrides belong in ignored `appsettings.Local.json`; an example is included. Both model endpoints use local Ollama at `http://127.0.0.1:11434`. No API keys are required. Initial dependency/model downloads require Internet access. A different installed embedding model digest triggers automatic re-embedding on startup.
 
-Semantic search and local AI answers are enabled by default in the committed `appsettings.json`; no private configuration or API credentials are required. Qwen2.5 generates answers; Nomic Embed Text creates embeddings. Optional machine-specific overrides belong in `appsettings.Local.json`, which is ignored by Git. The example override file is included.
+## Demo questions
 
-The demo PDFs and generated data are included, so no corpus download or manual ingestion step is required. If the installed Nomic model differs from the cached model version, the app regenerates embeddings automatically on startup, which may take longer. Keep the folder writable. If Ollama or an embedding model is unavailable, the app reports the limitation and falls back to keyword search. Initial NuGet and model downloads require Internet access; subsequent searches and answers run locally. Official source links require Internet access.
+- Which delegations discussed universal periodic review?
+- What did Brazil say about human rights in 2024?
+- What did Switzerland say about the death penalty?
+- What did Russia say about suspension in 2022?
+- What election results were recorded in A/79/PV.19?
 
-The Git repository includes `Data/raw/`, `Data/extracted/`, `Data/downloads.json`, `Data/corpus.json`, `Data/passages.json`, `Data/embeddings.json`, `Data/manifest.json`, and `Data/evaluation.json`. Build output, published binaries, IDE settings, private overrides, local runtimes/models, logs, temporary files, and generated evaluation reports are excluded. Keep `packages.lock.json` committed for reproducible dependency versions.
+**Include chair / Secretariat** is checked initially because election rules and announcements appear in the presiding officer's record. They are labelled as institutional/procedural evidence, not statements by the states named in election results. Uncheck it to focus on delegation statements. Council presidents presenting reports retain their institutional capacity rather than being attributed to their country's national position. Filters include delegation, dynamically detected meeting years (2020–2024), group capacity, and retrieval mode.
 
-## Use
+Known, scoped election proceedings are searchable. The demo still refuses questions using “never,” “first ever,” “all time,” or “ever elected”: ten selected records cannot establish complete historical absence. It does not implement a verified election-history database or comprehensive table of all elected/never-elected states.
 
-1. Enter a question and optionally select delegation/year/group filters.
-2. Select **Hybrid**, **Keyword**, or **Semantic** retrieval. Hybrid is the default.
-3. Uncheck **Generate a local AI answer** to compare retrieval without generation latency.
-4. Inspect the interpreted scope and actual retrieval mode above the answer.
-5. Open passage context, the full intervention, or the exact original PDF page.
-6. Click generated citation identifiers to jump to their evidence rows. Export CSV to preserve retrieved candidates and source links.
+## Conversational research workspace
 
-Useful comparisons:
+The interface keeps a conversation in the current browser tab. Each answer stores its resolved scope, retrieved evidence, citations, and CSV snapshot. New conversation clears history and scope; refreshing also clears history. There are no accounts, saved conversations, server chat storage, or general-purpose agent memory.
 
-- `Water is becoming more acidic`
-- `Catching fish without reporting it`
-- `Sharing scientific know-how with poorer nations`
-- `Coastlines moving inland as water rises`
-- `plastic pollution`
-- `What did Samoa and Tonga say about financing?`
-- `plastic pollution in A/78/PV.44`
+1. Ask a full question, such as “Which delegations discussed universal periodic review?”
+2. Refine with “same question in 2023”, “show group statements”, “previous year”, or “previous session”. Unsupported follow-ups ask for clarification instead of guessing.
+3. Use “Compare by year” below an answer, with the two years selected in the sidebar, or ask “compare 2023 and 2024”. “Compare with 2023” requires a single-year baseline. Comparisons run two evidence searches with generated summaries off, show each year's corpus size, and make no complete-count, trend, or policy-change claim.
+4. Inspect the grouped evidence table. A group label supplements the actual speaking delegation. Expand further passages, inspect context/full interventions, follow citations to their own answer's evidence, or open PDF source pages.
+5. Export returned evidence from a specific answer. CSV is generated from that immutable browser snapshot, without rerunning search or applying later filters. It includes the original message, resolved question, source references, and scope; it contains only returned passages, including any response cap. Comparison CSV includes the year for each row.
 
-The natural-language scope parser remains rule-based. Explicit filters take precedence. It recognizes multiple named delegations, a small documented alias map, explicit years and GA PV symbols. It does not implement arbitrary date-language interpretation, autonomous query planning or conversation memory. Each question is independent.
+The sidebar fixes meeting body to General Assembly and record type to PV because the corpus supports no alternatives. Filters and models remain available for the next request; earlier answers keep their own scope. Corpus coverage and all ten indexed records can be opened from the top banner or sidebar.
 
-## Data and attribution
+Explicit delegation/year filters conflicting with a named speaker/year in the question now block retrieval and generation, including legacy ask/export endpoints. Align them and retry. An explicit absent speaker returns no matching evidence rather than broadening to other delegations. Name/intent detection remains rule-based: this is a bounded research conversation, not unrestricted natural-language understanding.
 
-The downloaded English UN Digital Library corpus contains 138 PDF pages in four records:
+“Previous session” uses actual General Assembly session metadata, not calendar-year subtraction. Start from a single regular-session year or document. Ambiguous scopes and emergency-session contexts request clarification. Changing the year clears earlier document/session restrictions so they do not silently prevent matching records.
 
-| Symbol | Meeting date | Pages | Official catalogue |
-| --- | --- | ---: | --- |
-| A/78/PV.43 | 2023-12-05 | 32 | https://digitallibrary.un.org/record/4045203 |
-| A/78/PV.44 | 2023-12-05 | 33 | https://digitallibrary.un.org/record/4045724 |
-| A/78/PV.48 | 2023-12-18 | 29 | https://digitallibrary.un.org/record/4048288 |
-| A/79/PV.52 | 2024-12-12 | 44 | https://digitallibrary.un.org/record/4114820 |
+## Source corpus
 
-Only agenda sections including item 75 are indexed. The parser detects 104 interventions including procedural speakers. A/78/PV.44 is a technically reissued record dated 3 July 2025. This is a selected corpus, not continuous historical coverage. The UN's official topic list is https://www.un.org/depts/los/general_assembly/general_assembly_records.htm.
+**10 English General Assembly PV records, 175 PDF pages, 151 detected interventions, and 921 passages.** These are General Assembly proceedings concerning the HRC, including elections held by the Assembly; they are not ten Geneva HRC session transcripts. There is no SR corpus in this demo. The selected dates range from 13 October 2020 to 1 November 2024.
 
-PDFs are unchanged. Layout-aware PdfPig extraction identifies speaker boundaries and retains one-based physical PDF page references. Group statements retain both the speaker's delegation and represented group; group members are not expanded into individual speakers. Attribution is heuristic and needs review. OCR, arbitrary SR layouts and comprehensive corrigendum handling are not implemented.
+| Official symbol | Meeting date | Pages | Indexed subject |
+|---|---|---:|---|
+| A/75/PV.16 | 2020-10-13 | 14 | HRC election; agenda 119 |
+| A/76/PV.19 | 2021-10-14 | 11 | HRC election; agenda 116; unrelated tributes excluded |
+| A/ES-11/PV.10 | 2022-04-07 | 25 | Suspension debate; emergency-session agenda 5 |
+| A/76/PV.71 | 2022-05-10 | 4 | HRC by-election; agenda 116 |
+| A/77/PV.17 | 2022-10-11 | 4 | HRC election; agenda 117 |
+| A/78/PV.17 | 2023-10-10 | 3 | HRC election; agenda 114 |
+| A/78/PV.23 | 2023-10-31 | 27 | HRC report debate; agenda 66 |
+| A/78/PV.28 | 2023-11-07 | 33 | Continued HRC report debate; agenda 66 only |
+| A/79/PV.19 | 2024-10-09 | 18 | HRC election; agenda 115 |
+| A/79/PV.32 | 2024-11-01 | 36 | HRC report debate; agenda 66 |
 
-| File or directory | Purpose |
-| --- | --- |
-| `Data/raw/` | Original PDFs |
-| `Data/manifest.json` | Document metadata and official URLs |
-| `Data/downloads.json` | Download provenance and PDF checksums |
-| `Data/extracted/` | Page-labelled extraction |
-| `Data/corpus.json` | Parent interventions and ingestion status |
-| `Data/passages.json` | Passage IDs, parent IDs and exact source-page offsets |
-| `Data/embeddings.json` | Cached vectors, model digest and chunking version |
-| `Data/evaluation.json` | Development queries and inspected source anchors |
-| `Data/retrieval-evaluation.json` | Generated evaluation report |
+Eight files were downloaded from the UN Digital Library; A/77/PV.17 and A/79/PV.32 use the official UN document system. Exact catalogue/document URLs, per-document agenda scope, download timestamps, sizes, and SHA-256 fingerprints are in `Data/manifest.json` and `Data/downloads.json`. Original PDFs remain unchanged. A meeting can include other topics; the full PDF is retained, but only configured agenda sections are indexed. Attribution and agenda boundaries remain heuristic and require review.
 
-## Retrieval implementation
+## Processing and retrieval
 
-```text
-Official PDFs + metadata
-  -> attributed interventions and page segments
-  -> overlapping passages of at most 800 characters
-  -> BM25 passage index + cached Nomic vectors
-Question + validated filters
-  -> keyword ranking and/or cosine similarity ranking
-  -> reciprocal rank fusion for Hybrid mode
-  -> evidence passages, parent intervention context and source pages
-  -> optional local Qwen2.5 answer with validated passage citations
-```
+1. `CorpusLoader.cs` checks the manifest, PDF hashes, and parser version. PdfPig extraction handles one/two-column layouts, page boundaries, and publication notices. Document-specific `agendaItems` determine the indexed sections. Speaker labels, group statements, translated chair labels, and HRC president roles are detected heuristically. Non-agenda tribute sections interrupt election indexing.
+2. `PassageIndex.cs` splits page segments into at most 800 characters, preferring sentence/word boundaries, with about 120 characters of overlap. Passages never cross speakers or pages. IDs, parent IDs, exact source offsets, and page links are retained.
+3. `EmbeddingIndex.cs` uses local `nomic-embed-text`, Nomic's `search_document:`/`search_query:` prefixes, normalized 768-dimensional vectors, and an incremental cache keyed by text and model/chunk version. The query is embedded at request time; the .NET app compares it with stored vectors.
+4. `HybridSearch.cs` applies delegation/year/document/capacity filters. Keyword mode uses BM25-style scoring; Semantic uses cosine similarity; Hybrid combines up to 40 candidates per method with reciprocal rank fusion. Keyword rank contributes only with full normalized topic-term coverage; partial lexical matches need semantic support in Hybrid. The cosine threshold is 0.60 and needs independent domain validation. A similarity score is not a confidence probability.
+5. `AnswerGenerator.cs` sends up to six passages, at most two per parent intervention, to `qwen2.5:1.5b`. A constrained JSON answer is converted into clickable citations after checking source IDs. Citation validity does not prove factual support. Failed generation retains the evidence. The context viewer and full intervention/PDF links allow verification.
 
-Passages never cross speaker or PDF page boundaries. They end at sentence/word boundaries where possible and overlap by approximately 120 characters. Each passage stores exact start and length offsets into its parent page text, so source-substring integrity is testable. The current corpus yields 841 passages.
+The UI displays at most 200 passages; hybrid pools contain at most 80 candidates before fusion. Counts and CSV rows describe retrieved candidates, not an exhaustive survey. Supported speaker/year conflicts now request clarification before retrieval or generation. Review attribution and claim support in generated answers; citation IDs alone cannot establish factual correctness. No verified procedural fact extraction or automatic election tallies are claimed.
 
-Semantic vectors use Nomic's required `search_document:` and `search_query:` prefixes. Vectors are normalized; cosine similarity is a dot product. The index has 768 dimensions. Model input truncation is disabled: oversized passages cause an explicit indexing error rather than silent loss of text.
+If embeddings are unavailable, the app reports keyword fallback. Start Ollama and restart the app to enable semantic retrieval. Local model endpoints are restricted to loopback. Document/model text is rendered as text; CSV values are protected against formula prefixes. This demo has no production authentication or access controls.
 
-The keyword index uses BM25-style scoring with k1=1.2 and b=0.75. Token normalization includes a short explicit synonym list. Full-text statistics are precomputed. The former whole-intervention search implementation remains in `EvidenceSearch.cs` as a baseline for regression tests; the application uses `HybridSearch.cs`.
+## Data files
 
-Hybrid retrieval fuses the top 40 keyword and top 40 semantic candidates using `1/(60 + rank)` from each list, with a keyword rank contribution only when all normalized topic terms are present in the passage. Partial keyword matches need semantic support to appear in Hybrid results; Keyword mode still exposes partial matches. A candidate appearing in both lists receives both contributions when its keyword coverage is complete. Semantic candidates must pass the configured cosine threshold, initially 0.60 for this model/corpus. Similarity is not a confidence probability. The threshold was calibrated on a small development set and needs independent validation before production use.
+| Path | Purpose |
+|---|---|
+| `Data/manifest.json` | Ten source records, official links, and per-document agenda scope |
+| `Data/raw/` | Original official PDFs |
+| `Data/downloads.json` | Provenance, download times, sizes, and hashes |
+| `Data/extracted/` | Page-labelled extracted text |
+| `Data/corpus.json` | Parsed statements and ingestion status |
+| `Data/passages.json` | Passage text, parent links, and exact offsets |
+| `Data/embeddings.json` | Cached local vectors and model metadata |
+| `Data/evaluation.json` | Six inspected HRC development questions and source anchors |
+| `Data/retrieval-evaluation.json` | Generated evaluation report, excluded from Git |
 
-Generation uses up to six retrieved passages with at most two per parent intervention, reducing domination by one speech. Nomic is an encoder, not another answer-generation LLM. Question embeddings are small local requests; stored passage embeddings are reused at startup when model digest, chunk version and source-text hashes match. Only new/changed text is embedded. Changing an embedding model rebuilds vectors; changing the answer model does not.
+Build output, IDE state, private settings, local runtimes/models, logs, and temporary files are ignored. Source code, dependency lock file, PDFs, and reusable data caches are included. `EvidenceSearch.cs` retains the earlier whole-statement implementation and token-normalization helper; the active app uses `HybridSearch.cs`, and current tests target that implementation.
 
-If local embedding initialization or a query embedding fails, the app explicitly falls back to keyword search and shows a warning. It never labels fallback output as semantic or hybrid. Query embedding calls have a 15-second deadline; ingestion batches have a longer deadline. Start a stopped Ollama server using the Windows app or `ollama serve`; restart the app if its semantic index did not initialize.
-
-## Counts and completeness
-
-Hybrid/semantic results are ranked candidates, **not all relevant statements**. Their counts describe retrieved distinct parent interventions and delegations, not an exhaustive census. CSV exports all retrieved candidates, not the entire relevant universe. Keyword mode considers all matching passages in the selected scope; the UI displays at most 200. Hybrid mode has at most 80 candidates before fusion/deduplication.
-
-The generated answer sees only a subset of those candidates and must not claim complete coverage. A full-scope relevance-classification workflow and verified election-history database are deferred. Historical election/first-ever claims are refused because the corpus cannot establish them.
-
-## Generation and configuration
-
-`appsettings.Local.json` enables local Qwen2.5. `appsettings.json` leaves generation disabled for a clean checkout. Local settings and environment variables override defaults. Restart the app after configuration changes.
-
-```json
-{
-  "Generation": {
-    "Enabled": true,
-    "BaseUrl": "http://127.0.0.1:11434",
-    "Model": "qwen2.5:1.5b",
-    "MaxEvidence": 6,
-    "KeepAlive": "30m",
-    "TimeoutSeconds": 300
-  },
-  "Retrieval": {
-    "Enabled": true,
-    "EmbeddingModel": "nomic-embed-text",
-    "MinSimilarity": 0.60,
-    "CandidateLimit": 40
-  }
-}
-```
-
-The answer model uses temperature zero, an 8,192-token context, and at most 700 output tokens. It returns a constrained JSON claim list with source IDs selected from the provided passages. C# validates IDs and builds citation links. ID validity does not establish factual entailment. Unsupported claims, attribution mistakes and repetition remain possible; inspect the source evidence. Invalid model output or unavailable generation leaves retrieved evidence intact. First model loading is slower than warm inference.
-
-No questions or documents are sent to a remote LLM or embedding service. Only loopback HTTP endpoints are accepted. Source/model text is rendered as text, not HTML. CSV cells are protected against formula prefixes. This local demo has no authentication or production authorization controls.
-
-## Rebuild and verify
+## Rebuild and verification
 
 ```powershell
-.\Download-Corpus.ps1           # missing PDFs only; -Force replaces with current official downloads
+.\Download-Corpus.ps1
 dotnet run --no-launch-profile -- --ingest
 dotnet run --no-launch-profile -- --rebuild-embeddings --ingest
 dotnet run --no-launch-profile -- --self-test
 dotnet run --no-launch-profile -- --evaluate
 ```
 
-Run `Test-Api.ps1` and `Test-LocalGeneration.ps1` against a running application. Both accept `-BaseUrl`, allowing tests on a separate port while Visual Studio uses its own port.
+`Download-Corpus.ps1` downloads missing PDFs; `-Force` replaces them with current official downloads. Self-tests cover the real HRC corpus, parser boundaries and capacity, filters, source offsets, RRF, embedding cache/recovery, and model citation handling. Stub vectors exercise routing, not semantic accuracy. Live `--evaluate` compares retrieval modes on six development questions; source-anchor and topic-phrase hits are not independent precision/recall or a production accuracy guarantee.
 
-Self-tests verify parsing, exact source substrings, filters, passage IDs and offsets, rank fusion, vector normalization, cache reuse/invalidation, embedding outage fallback, and model citation validation. Stub vectors test routing correctness; they do not measure semantic model quality.
+Against a running app:
 
-The live evaluation compares Keyword, Semantic and Hybrid on six development queries, including paraphrases and an out-of-domain negative. It preserves two different measurements: finding the original inspected source anchors at ranks 5/10, and finding an expected topic phrase within the first five results. The second is a weak label, not a full relevance judgment. Equivalent relevant passages may differ from the original anchors. Results and threshold choices must not be presented as held-out precision/recall or a production accuracy guarantee. Some original source anchors remain outside the first ten results even when equivalent topic evidence is retrieved.
+```powershell
+.\Test-Api.ps1
+.\Test-LocalGeneration.ps1
+```
 
-## Main code and APIs
+`Test-ResearchApi.ps1` additionally checks conversation context, year/session refinement, conflicts, group-only retrieval, and comparisons. All three scripts accept `-BaseUrl` to test a separate instance without occupying a Visual Studio port.
 
-- `CorpusLoader.cs`: PDF extraction and intervention attribution.
-- `PassageIndex.cs`: page-local passages and source offsets.
-- `EmbeddingIndex.cs`: local embedding API, validated vectors and incremental cache.
-- `HybridSearch.cs`: interpreted filters, passage BM25, cosine ranking and RRF.
-- `AnswerGenerator.cs`: constrained local model generation and validated source IDs.
-- `Program.cs`: startup, CLI modes and HTTP endpoints.
+`ResearchService.cs` resolves supported follow-ups into typed requests and executes bounded comparisons. Conversation context is client-supplied request data, not trusted identity or authorization.
 
-Endpoints: `GET /api/corpus`, `POST /api/ask`, `POST /api/export`, `GET /api/passages/{id}`, `GET /api/interventions/{id}`, and `GET /api/documents/{id}/pdf`.
+API endpoints: `POST /api/research`, `GET /api/corpus`, `POST /api/ask`, `POST /api/export`, `GET /api/passages/{id}`, `GET /api/interventions/{id}`, and `GET /api/documents/{id}/pdf`. Ask/export accepts `question`, optional `delegation`/`year`, `groupsOnly`, `includeProcedural`, `generate`, optional `session`, and `searchMode` (`keyword`, `semantic`, `hybrid`).
 
-An ask/export request includes `question`, optional `delegation`/`year`, `groupsOnly`, `includeProcedural`, `generate`, and `searchMode` (`keyword`, `semantic`, `hybrid`). Responses disclose actual retrieval mode, interpreted scope, candidate counts and fallback warnings. Evidence includes passage IDs, parent IDs, page links and keyword/semantic rank diagnostics.
+## Production design and acknowledgements
 
-## Production path and attribution
+See `Documentation/Meeting-AI-Azure-Design.md` for the proposed Azure production architecture: approved archive integration, versioned ingestion, managed hybrid search, and separately validated procedural facts and coverage. The local JSON/vector scan is a demo, not the full 20-year service. The technical design, architecture overview, and executive summary describe the current HRC pilot and distinguish its implemented workspace from the proposed Azure service.
 
-This increment deliberately keeps vectors and metadata local. The in-memory BM25/vector scan is adequate for 841 passages; it is not an architecture for the full 20-year archive. A production version should move to PostgreSQL full-text/pgvector or another managed hybrid index, add ingestion queues and revision handling, review attribution, evaluate on independent expert-labelled questions, implement authorization/audit controls, and distinguish exploratory retrieval from exhaustive research.
+Official records belong to the United Nations; source links and provenance are retained. This independent prototype does not imply UN endorsement. PdfPig is Apache 2.0; NuGet versions are pinned. Model references: [Nomic](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5), [Ollama embeddings API](https://docs.ollama.com/api/embed). Codex assisted implementation, source discovery, and verification. Qwen2.5 and Nomic support the local demo; Qwen3 is not used.
 
-Official records belong to the United Nations; preserve attribution and source URLs. This independent prototype does not imply UN endorsement. PdfPig is Apache 2.0; NuGet dependencies are pinned in `packages.lock.json`. Nomic embedding model documentation: https://huggingface.co/nomic-ai/nomic-embed-text-v1.5. Ollama embedding API: https://docs.ollama.com/api/embed. Codex assisted implementation, source discovery and verification. Disclose Qwen2.5 and Nomic use in the hackathon AI declaration. Qwen3 was removed and is not used.
-
-
-
+`POST /api/research` accepts `{ request, previousRequest?, action?, compareYears? }`. The nested request uses the ask fields. Actions are `ask`, `groups`, `compare`, `previous-year`, and `previous-session`. Responses distinguish `answer`, `comparison`, and `clarification`, and include the resolved request. At most two comparison years are supported. A prior context is required for follow-ups; the server does not retain one between requests.
